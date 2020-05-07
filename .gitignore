@@ -1,2 +1,4 @@
 
 *.geojson
+*.html
+cities.txt

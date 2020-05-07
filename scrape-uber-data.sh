@@ -2,20 +2,32 @@
 
 # Uber movement data scraping script
 # Rutgers Urban & Civic Informatics Lab - Maintained by Gavin Rozzi - gavin.rozzi@rutgers.edu
+# Usage ./scrape-uber-data.sh YEAR
 
 # This is a script to generate data for research using the Uber movement data toolkit
-# Requires nodejs and the Uber mdt installed (npm install -g movement-data-toolkit)
+YEAR=$1
 
-# Usage: specify the year and city to generate a dataset. This script will output in both GeoJSON and CSV by default
+# Create data directory if it doesnt already exist
+mkdir -p data/$YEAR
 
-# Declare which year we want to scrape (TODO: make this an argument instead of hard coding)
-YEAR=2020
+# Scrape the HTML of the Uber movement data page to get a listing of cities with available data
+# If phantomjs throws an error try setting this environment variable: 'export QT_QPA_PLATFORM=offscreen'
+phantomjs get-uber-html.js
 
-# Declare array of cities we want to scrape
-declare -a CITIES=('new_york')
+# Filter the scraped HTML of the Uber web page and store the names of URL slugs as cities.txt
 
-# Scrape data for each city and store its output
-for city in ${CITIES[@]}; do
-    echo 'Downloading data for' $city, $YEAR
-    mdt create-geometry-file $city $YEAR -o $city-$YEAR.geojson
+# cat prints the contents of the HTML code to stdin and pipe operators feed the output to grep. grep recognizes lines that have links and we filter them to just cities.
+# Subsequent expressions clean the links until we have just the city slugs that can be plugged in to the API
+
+# TODO this need to be split into cities with travel times and speed to prevent the mdt api from throwing errors.
+# two loops need to be constructed.
+cat uber_cities.html | grep -Eoi '<a [^>]+>' | grep -Eo 'href="[^\"]+"' | grep -e "explore" | sed 's/href="//g' | sed 's/"//g' | sed 's:/travel-times::g' | sed 's:/speeds::g' | sed 's:?lang=en-US::g' | sed 's:/explore/::g' | sed 's:/mobility-heatmap::g' | uniq -u > cities.txt  
+
+# Iterate over the lines in cities.txt and download the data to folder for corresponding year
+cat cities.txt | while read line ; do
+   echo 'Downloading data for' $line, $YEAR
+   mdt create-geometry-file $line $YEAR -o data/$YEAR/$line.geojson
 done
+
+# Delete the empty files created by the errors. Not perfect, but gets rid of junk data until I can revise this script further.
+find data/ -type f -empty
