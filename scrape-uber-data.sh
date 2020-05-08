@@ -4,6 +4,9 @@
 # Rutgers Urban & Civic Informatics Lab - Maintained by Gavin Rozzi - gavin.rozzi@rutgers.edu
 # Usage ./scrape-uber-data.sh YEAR
 
+# Increased node memory heap. Needed to prevent mdt from crashing
+export NODE_OPTIONS=--max-old-space-size=8192
+
 # This is a script to generate data for research using the Uber movement data toolkit
 YEAR=$1
 
