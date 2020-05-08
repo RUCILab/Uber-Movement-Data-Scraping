@@ -30,4 +30,4 @@ cat cities.txt | while read line ; do
 done
 
 # Delete the empty files created by the errors. Not perfect, but gets rid of junk data until I can revise this script further.
-find data/ -type f -empty
+find data/ -type f -empty -delete
