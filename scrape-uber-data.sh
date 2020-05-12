@@ -11,7 +11,7 @@ export NODE_OPTIONS=--max-old-space-size=8192
 YEAR=$1
 
 # Create data directory if it doesnt already exist
-mkdir -p data/$YEAR
+mkdir -p ~/movement-data/uber/$YEAR
 
 # Scrape the HTML of the Uber movement data page to get a listing of cities with available data
 # If phantomjs throws an error try setting this environment variable: 'export QT_QPA_PLATFORM=offscreen'
@@ -29,8 +29,8 @@ cat uber_cities.html | grep -Eoi '<a [^>]+>' | grep -Eo 'href="[^\"]+"' | grep -
 # Iterate over the lines in cities.txt and download the data to folder for corresponding year
 cat cities.txt | while read line ; do
    echo 'Downloading data for' $line, $YEAR
-   mdt create-geometry-file $line $YEAR -o data/$YEAR/$line.geojson
+   mdt create-geometry-file $line $YEAR -o ~/movement-data/uber/$YEAR/$line.geojson
 done
 
 # Delete the empty files created by the errors. Not perfect, but gets rid of junk data until I can revise this script further.
-find data/ -type f -empty -delete
+find ~/movement-data/uber/ -type f -empty -delete
