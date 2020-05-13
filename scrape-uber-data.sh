@@ -29,7 +29,10 @@ cat uber_cities.html | grep -Eoi '<a [^>]+>' | grep -Eo 'href="[^\"]+"' | grep -
 # Iterate over the lines in cities.txt and download the data to folder for corresponding year
 cat cities.txt | while read line ; do
    echo 'Downloading data for' $line, $YEAR
+   # GeoJSON version
    mdt create-geometry-file $line $YEAR -o ~/movement-data/uber/$YEAR/$line.geojson
+   # CSV version
+   mdt create-geometry-file --format=CSV $line $YEAR -o ~/movement-data/uber/$YEAR/$line.csv --format=CSV
 done
 
 # Delete the empty files created by the errors. Not perfect, but gets rid of junk data until I can revise this script further.
